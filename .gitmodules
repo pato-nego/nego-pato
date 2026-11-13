@@ -1,0 +1,15 @@
+[submodule "services/Account"]
+	path = services/Account
+	url = https://github.com/pato-nego/Account.git
+[submodule "services/Account-service"]
+	path = services/Account-service
+	url = https://github.com/pato-nego/Account-service.git
+[submodule "services/Auth"]
+	path = services/Auth
+	url = https://github.com/pato-nego/Auth.git
+[submodule "services/Auth-service"]
+	path = services/Auth-service
+	url = https://github.com/pato-nego/Auth-service.git
+[submodule "services/Gateway-service"]
+	path = services/Gateway-service
+	url = https://github.com/pato-nego/Gateway-service.git
