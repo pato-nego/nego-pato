@@ -13,3 +13,6 @@
 [submodule "services/Gateway-service"]
 	path = services/Gateway-service
 	url = https://github.com/pato-nego/Gateway-service.git
+[submodule "services/Exchange"]
+	path = services/Exchange
+	url = https://github.com/pato-nego/Exchange.git
