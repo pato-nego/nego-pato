@@ -19,3 +19,6 @@
 [submodule "services/Exchange-service"]
 	path = services/Exchange-service
 	url = https://github.com/pato-nego/Exchange-service.git
+[submodule "services/Product"]
+	path = services/Product
+	url = https://github.com/pato-nego/Product.git
