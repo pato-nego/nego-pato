@@ -62,8 +62,8 @@ services:
   exchange:
     profiles: [exchange]
     build:
-      context: ../..
-      dockerfile: services/Exchange/Dockerfile
+      context: ../../api
+      dockerfile: exchange/Dockerfile
     restart: unless-stopped
     ports: ["8000:8000"]
 

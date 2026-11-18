@@ -1,24 +1,24 @@
 [submodule "services/Account"]
-	path = services/Account
+	path = api/account
 	url = https://github.com/pato-nego/Account.git
 [submodule "services/Account-service"]
-	path = services/Account-service
+	path = api/account-service
 	url = https://github.com/pato-nego/Account-service.git
 [submodule "services/Auth"]
-	path = services/Auth
+	path = api/auth
 	url = https://github.com/pato-nego/Auth.git
 [submodule "services/Auth-service"]
-	path = services/Auth-service
+	path = api/auth-service
 	url = https://github.com/pato-nego/Auth-service.git
 [submodule "services/Gateway-service"]
-	path = services/Gateway-service
+	path = api/gateway-service
 	url = https://github.com/pato-nego/Gateway-service.git
 [submodule "services/Exchange"]
-	path = services/Exchange
+	path = api/exchange
 	url = https://github.com/pato-nego/Exchange.git
 [submodule "services/Exchange-service"]
-	path = services/Exchange-service
+	path = api/exchange-service
 	url = https://github.com/pato-nego/Exchange-service.git
 [submodule "services/Product"]
-	path = services/Product
+	path = api/product
 	url = https://github.com/pato-nego/Product.git

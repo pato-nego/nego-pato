@@ -5,18 +5,19 @@ The plural `/exchanges/{from}/{to}` path also works. Exchange
 runs on the private Compose network and accepts the account ID forwarded by the
 gateway after it validates the login cookie.
 
-From the parent repo, initialize submodules and build the Java services with JDK 25
-and Maven:
+The `api/` folder holds the backend submodules and local Compose stack.
+From the parent repo, initialize submodules and build the Java services with
+JDK 25 and Maven.
 
 ```sh
 git submodule update --init --recursive
-mvn -f services/Account/pom.xml install
-mvn -f services/Auth/pom.xml install
-mvn -f services/Account-service/pom.xml package
-mvn -f services/Auth-service/pom.xml package
-mvn -f services/Gateway-service/pom.xml package
+mvn -f api/account/pom.xml install
+mvn -f api/auth/pom.xml install
+mvn -f api/account-service/pom.xml package
+mvn -f api/auth-service/pom.xml package
+mvn -f api/gateway-service/pom.xml package
 export JWT_SECRET_KEY="$(openssl rand -base64 32)"
-docker compose up --build
+docker compose -f api/compose.yaml up --build
 ```
 
 Register and log in through the gateway using `POST /auth/register` and

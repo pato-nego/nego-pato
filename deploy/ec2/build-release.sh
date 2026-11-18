@@ -9,21 +9,21 @@ fi
 output=$(realpath -m "$1")
 cd "$(git rev-parse --show-toplevel)"
 
-for service in Account Account-service Auth Auth-service Gateway-service Exchange Exchange-service Product; do
-    pinned=$(git rev-parse "HEAD:services/$service")
-    actual=$(git -C "services/$service" rev-parse HEAD)
-    if [[ "$actual" != "$pinned" ]] || [[ -n "$(git -C "services/$service" status --porcelain)" ]]; then
+for service in account account-service auth auth-service gateway-service exchange exchange-service product; do
+    pinned=$(git rev-parse "HEAD:api/$service")
+    actual=$(git -C "api/$service" rev-parse HEAD)
+    if [[ "$actual" != "$pinned" ]] || [[ -n "$(git -C "api/$service" status --porcelain)" ]]; then
         printf 'Expected a clean checkout of %s at %s\n' "$service" "$pinned" >&2
         exit 1
     fi
 done
 
 maven=${MAVEN:-mvn}
-for service in Account Auth; do
-    "$maven" -B -ntp -f "services/$service/pom.xml" install
+for service in account auth; do
+    "$maven" -B -ntp -f "api/$service/pom.xml" install
 done
-for service in Account-service Auth-service Gateway-service Product; do
-    "$maven" -B -ntp -f "services/$service/pom.xml" package
+for service in account-service auth-service gateway-service product; do
+    "$maven" -B -ntp -f "api/$service/pom.xml" package
 done
 
 staging=$(mktemp -d)
@@ -32,18 +32,18 @@ for role in gateway identity exchange product; do
     mkdir -p "$staging/$role/deploy/ec2/artifacts"
     cp deploy/ec2/{compose.yaml,Caddyfile,gateway-routes.yaml,init-databases.sql} "$staging/$role/deploy/ec2/"
 done
-cp services/Gateway-service/target/gateway-service-*.jar "$staging/gateway/deploy/ec2/artifacts/gateway.jar"
-cp services/Account-service/target/account-service-*.jar "$staging/identity/deploy/ec2/artifacts/account.jar"
-cp services/Auth-service/target/auth-service-*.jar "$staging/identity/deploy/ec2/artifacts/auth.jar"
-cp services/Product/target/product-*.jar "$staging/product/deploy/ec2/artifacts/product.jar"
+cp api/gateway-service/target/gateway-service-*.jar "$staging/gateway/deploy/ec2/artifacts/gateway.jar"
+cp api/account-service/target/account-service-*.jar "$staging/identity/deploy/ec2/artifacts/account.jar"
+cp api/auth-service/target/auth-service-*.jar "$staging/identity/deploy/ec2/artifacts/auth.jar"
+cp api/product/target/product-*.jar "$staging/product/deploy/ec2/artifacts/product.jar"
 
-for service in Exchange Exchange-service; do
-    destination="$staging/exchange/services/$service"
+for service in exchange exchange-service; do
+    destination="$staging/exchange/api/$service"
     mkdir -p "$destination"
-    git -C "services/$service" archive HEAD | tar -x -C "$destination"
+    git -C "api/$service" archive HEAD | tar -x -C "$destination"
 done
 mkdir -p "$output"
 for role in gateway identity exchange product; do
     tar -czf "$output/$role.tar.gz" -C "$staging/$role" deploy
 done
-tar -czf "$output/exchange.tar.gz" -C "$staging/exchange" deploy services
+tar -czf "$output/exchange.tar.gz" -C "$staging/exchange" deploy api

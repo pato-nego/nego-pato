@@ -1,2 +1,2 @@
 run:
-    uv --directory services/Exchange run uvicorn main:app --reload
+    uv --directory api/exchange run uvicorn main:app --reload

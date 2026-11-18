@@ -12,6 +12,9 @@ One private RDS PostgreSQL instance hosts `store` and `product`. Account
 and Product connect with different credentials and verify the database's TLS
 certificate. The private hosts share one NAT gateway for outbound internet access.
 
+The Product and Order owners manage their own machines and application deployments.
+Coordinate stack changes that create or replace those hosts with their owners.
+
 ## Provision
 
 Deploy `stack.yaml` in `sa-east-1`. Pass the existing gateway stack's VPC,

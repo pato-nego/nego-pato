@@ -1,6 +1,8 @@
+name: pato-nego
+
 services:
   gateway:
-    build: ./services/Gateway-service
+    build: ./gateway-service
     ports:
       - "127.0.0.1:${GATEWAY_PORT:-8080}:8080"
     depends_on:
@@ -10,17 +12,17 @@ services:
   exchange:
     build:
       context: .
-      dockerfile: services/Exchange/Dockerfile
+      dockerfile: exchange/Dockerfile
 
   auth:
-    build: ./services/Auth-service
+    build: ./auth-service
     environment:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:?Set JWT_SECRET_KEY before starting the stack}
     depends_on:
       - account
 
   account:
-    build: ./services/Account-service
+    build: ./account-service
     environment:
       DATABASE_HOST: db
       DATABASE_PORT: 5432
