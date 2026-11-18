@@ -1,0 +1,21 @@
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: insper-service
+              uri: https://www.insper.edu.br
+              predicates: [Path=/insper/**]
+            - id: account-service
+              uri: ${ACCOUNT_URL}
+              predicates: [Path=/accounts/**]
+            - id: auth-service
+              uri: ${AUTH_URL}
+              predicates: [Path=/auth/**]
+            - id: exchange-service
+              uri: ${EXCHANGE_URL}
+              predicates: ['Path=/exchange/**,/exchanges/**']
+            - id: product-service
+              uri: ${PRODUCT_URL}
+              predicates: ['Path=/products,/products/**']

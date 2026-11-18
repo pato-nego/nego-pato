@@ -1,6 +1,7 @@
 # nego-pato
 
-The gateway exposes the Exchange API at `GET /exchanges/{from}/{to}`. Exchange
+The gateway exposes the Bacen PTAX Exchange API at `GET /exchange/{from}/{to}`.
+The plural `/exchanges/{from}/{to}` path also works. Exchange
 runs on the private Compose network and accepts the account ID forwarded by the
 gateway after it validates the login cookie.
 
@@ -20,10 +21,12 @@ docker compose up --build
 
 Register and log in through the gateway using `POST /auth/register` and
 `POST /auth/login`. Send the resulting `__store_jwt_token` cookie to
-`GET http://localhost:8080/exchanges/USD/BRL`. A successful response contains
+`GET http://localhost:8080/exchange/USD/BRL`. A successful response contains
 `sell`, `buy`, `date`, and `id-account`.
 If port 8080 is in use, set `GATEWAY_PORT` before starting Compose and use it in
 the request URL.
+
+For the five-host São Paulo layout, see the [EC2 deployment guide](deploy/ec2/README.md).
 
 AI assisted with the Exchange handler, provider error handling, gateway and
 Compose wiring, and verification.

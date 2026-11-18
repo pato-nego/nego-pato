@@ -1,0 +1,232 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Private Pato Nego service hosts and PostgreSQL behind the existing EC2 gateway.
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  PublicSubnetId:
+    Type: AWS::EC2::Subnet::Id
+  GatewaySecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+  UbuntuAmi:
+    Type: AWS::EC2::Image::Id
+  PrimaryZone:
+    Type: AWS::EC2::AvailabilityZone::Name
+  SecondaryZone:
+    Type: AWS::EC2::AvailabilityZone::Name
+  AppSubnetCidr:
+    Type: String
+    Default: 10.42.0.64/26
+  SecondDatabaseSubnetCidr:
+    Type: String
+    Default: 10.42.0.128/26
+
+Resources:
+  AppSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VpcId
+      AvailabilityZone: !Ref PrimaryZone
+      CidrBlock: !Ref AppSubnetCidr
+  SecondDatabaseSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VpcId
+      AvailabilityZone: !Ref SecondaryZone
+      CidrBlock: !Ref SecondDatabaseSubnetCidr
+  EgressAddress:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+  Egress:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt EgressAddress.AllocationId
+      SubnetId: !Ref PublicSubnetId
+  AppRoutes:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VpcId
+  OutboundInternet:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref AppRoutes
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref Egress
+  PrivateRouting:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref AppRoutes
+      SubnetId: !Ref AppSubnet
+
+  WorkerSsh:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SSH from the gateway host
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref GatewaySecurityGroupId
+  IdentityFirewall:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Auth and Account from Gateway
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8081
+          SourceSecurityGroupId: !Ref GatewaySecurityGroupId
+  ExchangeFirewall:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Exchange from Gateway
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8000
+          ToPort: 8000
+          SourceSecurityGroupId: !Ref GatewaySecurityGroupId
+  ProductFirewall:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Product from Gateway
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          SourceSecurityGroupId: !Ref GatewaySecurityGroupId
+  WorkerTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        ImageId: !Ref UbuntuAmi
+        KeyName: !Ref KeyName
+        CreditSpecification:
+          CpuCredits: standard
+        MetadataOptions:
+          HttpTokens: required
+        BlockDeviceMappings:
+          - DeviceName: /dev/sda1
+            Ebs:
+              VolumeType: gp3
+              VolumeSize: 20
+              Encrypted: true
+              DeleteOnTermination: true
+        UserData:
+          Fn::Base64: |
+            #!/bin/bash
+            set -euo pipefail
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get -o Acquire::Retries=5 update
+            apt-get -o Acquire::Retries=5 install -y docker.io docker-compose-v2
+            systemctl enable --now docker
+  IdentityHost:
+    Type: AWS::EC2::Instance
+    DependsOn: [OutboundInternet, PrivateRouting]
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref WorkerTemplate
+        Version: !GetAtt WorkerTemplate.LatestVersionNumber
+      InstanceType: t3.small
+      SubnetId: !Ref AppSubnet
+      SecurityGroupIds: [!Ref WorkerSsh, !Ref IdentityFirewall]
+      Tags:
+        - Key: Name
+          Value: pato-nego-identity
+  ExchangeHost:
+    Type: AWS::EC2::Instance
+    DependsOn: [OutboundInternet, PrivateRouting]
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref WorkerTemplate
+        Version: !GetAtt WorkerTemplate.LatestVersionNumber
+      InstanceType: t3.micro
+      SubnetId: !Ref AppSubnet
+      SecurityGroupIds: [!Ref WorkerSsh, !Ref ExchangeFirewall]
+      Tags:
+        - Key: Name
+          Value: pato-nego-exchange
+  ProductHost:
+    Type: AWS::EC2::Instance
+    DependsOn: [OutboundInternet, PrivateRouting]
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref WorkerTemplate
+        Version: !GetAtt WorkerTemplate.LatestVersionNumber
+      InstanceType: t3.small
+      SubnetId: !Ref AppSubnet
+      SecurityGroupIds: [!Ref WorkerSsh, !Ref ProductFirewall]
+      Tags:
+        - Key: Name
+          Value: pato-nego-product
+  OrderHost:
+    Type: AWS::EC2::Instance
+    DependsOn: [OutboundInternet, PrivateRouting]
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref WorkerTemplate
+        Version: !GetAtt WorkerTemplate.LatestVersionNumber
+      InstanceType: t3.micro
+      SubnetId: !Ref AppSubnet
+      SecurityGroupIds: [!Ref WorkerSsh]
+      Tags:
+        - Key: Name
+          Value: pato-nego-order
+  DatabaseFirewall:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: PostgreSQL from Account and Product
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref IdentityFirewall
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          SourceSecurityGroupId: !Ref ProductFirewall
+  DatabaseSubnets:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: Private Pato Nego RDS subnets
+      SubnetIds: [!Ref AppSubnet, !Ref SecondDatabaseSubnet]
+  Database:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Snapshot
+    UpdateReplacePolicy: Snapshot
+    Properties:
+      Engine: postgres
+      EngineVersion: '18.6'
+      DBInstanceClass: db.t4g.micro
+      AllocatedStorage: '20'
+      StorageType: gp3
+      StorageEncrypted: true
+      AvailabilityZone: !Ref PrimaryZone
+      MultiAZ: false
+      PubliclyAccessible: false
+      DBSubnetGroupName: !Ref DatabaseSubnets
+      VPCSecurityGroups: [!Ref DatabaseFirewall]
+      MasterUsername: postgres
+      ManageMasterUserPassword: true
+      BackupRetentionPeriod: 7
+
+Outputs:
+  IdentityIp:
+    Value: !GetAtt IdentityHost.PrivateIp
+  ExchangeIp:
+    Value: !GetAtt ExchangeHost.PrivateIp
+  ProductIp:
+    Value: !GetAtt ProductHost.PrivateIp
+  OrderIp:
+    Value: !GetAtt OrderHost.PrivateIp
+  DatabaseHost:
+    Value: !GetAtt Database.Endpoint.Address
+  DatabaseAdminSecretArn:
+    Value: !GetAtt Database.MasterUserSecret.SecretArn
