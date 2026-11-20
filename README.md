@@ -13,9 +13,11 @@ JDK 25 and Maven.
 git submodule update --init --recursive
 mvn -f api/account/pom.xml install
 mvn -f api/auth/pom.xml install
+mvn -f api/order/pom.xml install
 mvn -f api/account-service/pom.xml package
 mvn -f api/auth-service/pom.xml package
 mvn -f api/gateway-service/pom.xml package
+mvn -f api/order-service/pom.xml package
 export JWT_SECRET_KEY="$(openssl rand -base64 32)"
 docker compose -f api/compose.yaml up --build
 ```

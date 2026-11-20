@@ -8,6 +8,8 @@ services:
     depends_on:
       - auth
       - exchange
+      - product
+      - order
 
   exchange:
     build:
@@ -32,6 +34,39 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  product:
+    build: ./product
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/store
+      DATABASE_USERNAME: store
+      DATABASE_PASSWORD: store
+      REDIS_HOST: redis
+      SPRING_CACHE_TYPE: ${PRODUCT_CACHE_TYPE:-redis}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  order:
+    build: ./order-service
+    environment:
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_DB: store
+      DATABASE_USERNAME: store
+      DATABASE_PASSWORD: store
+    depends_on:
+      db:
+        condition: service_healthy
+      product:
+        condition: service_started
+      exchange:
+        condition: service_started
+
+  redis:
+    image: redis:7-alpine
 
   db:
     image: postgres:18.6
