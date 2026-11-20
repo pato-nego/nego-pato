@@ -34,5 +34,8 @@ Exchange builds, tests, and releases through its
 The [Exchange README](https://github.com/pato-nego/Exchange#cicd) documents the
 Docker Hub and EKS settings.
 
+The [production EC2 workflow](.github/workflows/production-ec2.yml) builds and
+deploys the Exchange and Gateway revisions pinned in this repository.
+
 AI assisted with the Exchange handler, provider error handling, gateway and
 Compose wiring, and verification.
