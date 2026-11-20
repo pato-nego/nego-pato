@@ -27,7 +27,10 @@ Register and log in through the gateway using `POST /auth/register` and
 If port 8080 is in use, set `GATEWAY_PORT` before starting Compose and use it in
 the request URL.
 
-For the five-host São Paulo layout, see the [EC2 deployment guide](deploy/ec2/README.md).
+Exchange builds, tests, and releases through its
+[GitHub Actions workflow](https://github.com/pato-nego/Exchange/blob/main/.github/workflows/ci-cd.yml).
+The [Exchange README](https://github.com/pato-nego/Exchange#cicd) documents the
+Docker Hub and EKS settings.
 
 AI assisted with the Exchange handler, provider error handling, gateway and
 Compose wiring, and verification.
