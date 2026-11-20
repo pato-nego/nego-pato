@@ -25,12 +25,14 @@ services:
       AUTH_URL: http://auth:8080
       EXCHANGE_URL: http://exchange:8000
       PRODUCT_URL: http://product:8080
+      ORDER_URL: http://order:8080
       SPRING_CONFIG_ADDITIONAL_LOCATION: file:/etc/gateway/routes.yaml
     extra_hosts:
       auth: ${IDENTITY_IP:-127.0.0.1}
       account: ${IDENTITY_IP:-127.0.0.1}
       exchange: ${EXCHANGE_IP:-127.0.0.1}
       product: ${PRODUCT_IP:-127.0.0.1}
+      order: ${ORDER_IP:-127.0.0.1}
     volumes:
       - ./artifacts/gateway.jar:/app.jar:ro
       - ./gateway-routes.yaml:/etc/gateway/routes.yaml:ro

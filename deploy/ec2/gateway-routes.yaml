@@ -19,3 +19,6 @@ spring:
             - id: product-service
               uri: ${PRODUCT_URL}
               predicates: ['Path=/products,/products/**']
+            - id: order-service
+              uri: ${ORDER_URL}
+              predicates: ['Path=/orders,/orders/**']

@@ -6,7 +6,7 @@
 | Identity | Auth and Account | Private ports 8080 and 8081 from Gateway |
 | Exchange | Exchange API with the Exchange-service library | Private port 8000 from Gateway |
 | Product | Product API and Redis | Private port 8080 from Gateway |
-| Order | Dedicated host for the team's Order API | SSH through Gateway until Order is published |
+| Order | Order API, deployed by the Order-service GitHub Actions workflow | Private port 8080 from Gateway |
 
 One private RDS PostgreSQL instance hosts `store` and `product`. Account
 and Product connect with different credentials and verify the database's TLS
@@ -48,7 +48,7 @@ Extract the archives in `/opt/pato-nego-distributed` on each host. In each
 
 | Profile | Settings |
 | --- | --- |
-| `gateway` | `PUBLIC_HOST`, `IDENTITY_IP`, `EXCHANGE_IP`, `PRODUCT_IP` |
+| `gateway` | `PUBLIC_HOST`, `IDENTITY_IP`, `EXCHANGE_IP`, `PRODUCT_IP`, `ORDER_IP` |
 | `identity` | `DATABASE_HOST`, `ACCOUNT_DB_PASSWORD`, `JWT_SECRET_KEY` |
 | `exchange` | Empty |
 | `product` | `DATABASE_HOST`, `PRODUCT_DB_PASSWORD` |
@@ -76,5 +76,5 @@ docker compose --project-name pato-nego-distributed --profile "$PROFILE" ps
 ```
 
 Verify the public `/health-check` over HTTPS, register and log in with a
-disposable account, and call `/products` and `/exchange/USD/BRL` with the
-login cookie. Private services should be reachable through Gateway only.
+disposable account, and call `/products`, `/exchange/USD/BRL` and `/orders`
+with the login cookie. Private services should be reachable through Gateway only.
