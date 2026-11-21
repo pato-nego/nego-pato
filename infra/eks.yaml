@@ -1,0 +1,123 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Pato Nego EKS workers in two private subnets of the project VPC
+Parameters:
+  Vpc:
+    Type: AWS::EC2::VPC::Id
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet::Id
+  PrivateRouteTable:
+    Type: String
+  PublicRouteTable:
+    Type: String
+  PublicSubnetCCidr:
+    Type: String
+  PrivateSubnetCCidr:
+    Type: String
+  DatabaseFirewall:
+    Type: AWS::EC2::SecurityGroup::Id
+  AdminCidr:
+    Type: String
+Resources:
+  PrivateSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: sa-east-1c
+      CidrBlock: !Ref PrivateSubnetCCidr
+      Tags:
+        - {Key: Name, Value: pato-nego-eks-private-c}
+  PrivateRoute:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetC
+      RouteTableId: !Ref PrivateRouteTable
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: sa-east-1c
+      CidrBlock: !Ref PublicSubnetCCidr
+      Tags:
+        - {Key: Name, Value: pato-nego-eks-public-c}
+        - {Key: kubernetes.io/role/elb, Value: '1'}
+  PublicRoute:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetC
+      RouteTableId: !Ref PublicRouteTable
+  ClusterRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: eks.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+  NodeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: {Service: ec2.amazonaws.com}
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+  Cluster:
+    Type: AWS::EKS::Cluster
+    DependsOn: PrivateRoute
+    Properties:
+      Name: pato-nego
+      Version: '1.36'
+      UpgradePolicy: {SupportType: STANDARD}
+      RoleArn: !GetAtt ClusterRole.Arn
+      AccessConfig: {AuthenticationMode: API, BootstrapClusterCreatorAdminPermissions: true}
+      ResourcesVpcConfig:
+        SubnetIds: [!Ref PrivateSubnetA, !Ref PrivateSubnetC]
+        EndpointPrivateAccess: true
+        EndpointPublicAccess: true
+        PublicAccessCidrs: [!Ref AdminCidr]
+  SharedWorkers:
+    Type: AWS::EKS::Nodegroup
+    Properties:
+      ClusterName: !Ref Cluster
+      NodegroupName: shared
+      NodeRole: !GetAtt NodeRole.Arn
+      Subnets: [!Ref PrivateSubnetA]
+      InstanceTypes: [t3.medium]
+      DiskSize: 20
+      ScalingConfig: {DesiredSize: 1, MinSize: 1, MaxSize: 1}
+  ExchangeWorkers:
+    Type: AWS::EKS::Nodegroup
+    Properties:
+      ClusterName: !Ref Cluster
+      NodegroupName: exchange
+      NodeRole: !GetAtt NodeRole.Arn
+      Subnets: [!Ref PrivateSubnetC]
+      InstanceTypes: [t3.medium]
+      DiskSize: 20
+      Labels: {workload: exchange}
+      Taints:
+        - {Key: workload, Value: exchange, Effect: NO_SCHEDULE}
+      ScalingConfig: {DesiredSize: 1, MinSize: 1, MaxSize: 1}
+  Metrics:
+    Type: AWS::EKS::Addon
+    DependsOn: SharedWorkers
+    Properties:
+      ClusterName: !Ref Cluster
+      AddonName: metrics-server
+  DatabaseIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref DatabaseFirewall
+      SourceSecurityGroupId: !GetAtt Cluster.ClusterSecurityGroupId
+      IpProtocol: tcp
+      FromPort: 5432
+      ToPort: 5432
+      Description: EKS workloads to project PostgreSQL
