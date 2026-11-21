@@ -12,7 +12,7 @@ The Pato Nego EKS cluster uses sa-east-1. The CloudFormation stack creates a man
 | Order | order, HTTP 8080 | Order database credentials, RDS CA and Product/Exchange addresses |
 | Redis | product-redis, TCP 6379 | In-memory Product detail cache |
 
-Each service keeps its Kubernetes resources in its own repository’s `k8s/` directory. Order splits its Deployment, Service and autoscaler into three files. Account, Auth and Gateway consume Secrets whose values are provisioned directly in the namespace. Exchange consumes public Bacen data and uses the authenticated account ID forwarded by Gateway. Internal calls resolve services by their Kubernetes DNS names. Exchange runs on the node labeled `workload=exchange`.
+Each service keeps its Kubernetes resources in its own repository’s `k8s/` directory. Order defines its Deployment, Service and autoscaler together in `api/order-service/k8s/k8s.yaml`. Account, Auth and Gateway consume Secrets whose values are provisioned directly in the namespace. Exchange consumes public Bacen data and uses the authenticated account ID forwarded by Gateway. Internal calls resolve services by their Kubernetes DNS names. Exchange runs on the node labeled `workload=exchange`.
 
 ## Verify the cluster
 

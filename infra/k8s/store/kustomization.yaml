@@ -3,12 +3,16 @@ kind: Kustomization
 namespace: pato-nego
 resources:
   - ../../../api/product/k8s/k8s.yaml
-  - ../../../api/order-service/k8s/deployment.yaml
-  - ../../../api/order-service/k8s/service.yaml
-  - ../../../api/order-service/k8s/hpa.yaml
+  - ../../../api/order-service/k8s/k8s.yaml
   - order-config.yaml
 patches:
   - path: order-deployment.yaml
+  - target:
+      kind: Deployment
+      name: order
+    patch: |-
+      - op: remove
+        path: /spec/replicas
   - target:
       kind: Deployment
       name: 'product|product-redis|order'
