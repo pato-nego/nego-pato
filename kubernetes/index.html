@@ -95,7 +95,7 @@
               <ul class="nav flex-column">
               </ul>
             </li>
-            <li class="nav-item" data-bs-level="2"><a href="#product-and-order-handoff" class="nav-link">Product and Order handoff</a>
+            <li class="nav-item" data-bs-level="2"><a href="#product-and-order-on-the-shared-worker" class="nav-link">Product and Order on the shared worker</a>
               <ul class="nav flex-column">
               </ul>
             </li>
@@ -141,9 +141,24 @@
 <td>exchange, HTTP 8000</td>
 <td>PTAX timeout and cache durations</td>
 </tr>
+<tr>
+<td>Product</td>
+<td>product, HTTP 8080</td>
+<td>Product database credentials, RDS CA and Redis address</td>
+</tr>
+<tr>
+<td>Order</td>
+<td>order, HTTP 8080</td>
+<td>Order database credentials, RDS CA and Product/Exchange addresses</td>
+</tr>
+<tr>
+<td>Redis</td>
+<td>product-redis, TCP 6379</td>
+<td>In-memory Product detail cache</td>
+</tr>
 </tbody>
 </table>
-<p>Each service has its own setup file at <code>api/&lt;repo&gt;/k8s/k8s.yaml</code>. Account, Auth and Gateway consume Secrets whose values are provisioned directly in the namespace. Exchange consumes public Bacen data and uses the authenticated account ID forwarded by Gateway. Internal calls resolve services by their Kubernetes DNS names. Exchange runs on the node labeled <code>workload=exchange</code>.</p>
+<p>Each service keeps its Kubernetes resources in its own repository’s <code>k8s/</code> directory. Order splits its Deployment, Service and autoscaler into three files. Account, Auth and Gateway consume Secrets whose values are provisioned directly in the namespace. Exchange consumes public Bacen data and uses the authenticated account ID forwarded by Gateway. Internal calls resolve services by their Kubernetes DNS names. Exchange runs on the node labeled <code>workload=exchange</code>.</p>
 <h2 id="verify-the-cluster">Verify the cluster</h2>
 <p>With an authorized AWS identity and network path to the API, use the following commands.</p>
 <pre><code class="language-sh">aws eks update-kubeconfig --region sa-east-1 --name pato-nego
@@ -159,8 +174,39 @@ kubectl -n pato-nego top pods
 <pre><code class="language-sh">curl --cacert gateway.pem https://a696ab569ad9e4c62ae41bd9b2743a49-970d0868192873ca.elb.sa-east-1.amazonaws.com/health-check
 </code></pre>
 <p>The EKS namespace has an independent JWT key and an isolated database on the existing RDS instance. The public load-balancer smoke test passed with certificate verification, and the original EC2 gateway also returned 200 after the EKS release. Account verifies the RDS hostname and regional CA. Connectivity tests covered registration, login, account lookup, a live USD/BRL quote, the quote cache, logout and anonymous access control.</p>
-<h2 id="product-and-order-handoff">Product and Order handoff</h2>
-<p>The Product and Order owners control their releases. The exercise calls for each owner to add their own manifest, then deploy into the same namespace. Gateway expects <code>product:8080</code> and <code>order:8080</code>. Order should call <code>exchange:8000</code> and <code>product:8080</code>. Each owner needs an authorized AWS identity and a network path to the private or IP-restricted API. Each workload should have a ready endpoint before recording the five-service demo. The owners manage any additional dedicated workers.</p>
+<h2 id="product-and-order-on-the-shared-worker">Product and Order on the shared worker</h2>
+<p>Gateway routes to <code>product:8080</code> and <code>order:8080</code>. Order fetches product prices from Product and the USD/BRL quote from <code>exchange:8000</code>. Product caches repeated catalog detail reads in <code>product-redis:6379</code>. Only Gateway has a public load balancer.</p>
+<p>The parent repository pins both service revisions and their ECR image digests. Its Kustomize overlay reads the pinned manifests directly from the two submodules. It assigns Product, Order and Redis to the existing shared worker. Exchange stays on its dedicated worker. Reapply from the parent checkout with its submodules initialized:</p>
+<pre><code class="language-sh">kubectl kustomize --load-restrictor LoadRestrictionsNone infra/k8s/store |
+  kubectl apply --server-side --field-manager=pato-store -f -
+kubectl -n pato-nego rollout status deployment/product-redis
+kubectl -n pato-nego rollout status deployment/product
+kubectl -n pato-nego rollout status deployment/order
+</code></pre>
+<p>The render command reads files outside the overlay directory from the pinned local submodules. On a fresh namespace, provision the <code>rds-ca</code> ConfigMap with key <code>bundle.pem</code> and populate the following Secrets before deploying. Each application's login owns its own EKS database on the existing PostgreSQL instance. The overlay maps the CA bundle to the filename required by each service.</p>
+<table>
+<thead>
+<tr>
+<th>Secret</th>
+<th>Required keys</th>
+<th>Database</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>product-credentials</code></td>
+<td><code>DATABASE_HOST</code>, <code>DATABASE_NAME</code>, <code>DATABASE_USERNAME</code>, <code>DATABASE_PASSWORD</code></td>
+<td><code>pato_eks_product</code></td>
+</tr>
+<tr>
+<td><code>order-secrets</code></td>
+<td><code>DATABASE_HOST</code>, <code>DATABASE_USERNAME</code>, <code>DATABASE_PASSWORD</code></td>
+<td><code>pato_eks_order</code>, selected in <code>order-config</code></td>
+</tr>
+</tbody>
+</table>
+<p>A rollout initially exhausted PostgreSQL connections when overlapping replicas opened their default pools. Each EKS Product and Order replica now keeps one idle connection and can use up to three. Both apps request 125m CPU. Their autoscalers target 100% of that request, preserving the original 125m CPU threshold. A supervised scale check brought Product and Order to two Ready replicas each at the same time on the shared worker. The autoscalers were then restored to their normal range of one to three. Simultaneous scale-out across several services is limited by the capacity of the shared worker.</p>
+<p><a href="../evidence/eks-purchase.webm">Watch the cluster and purchase demonstration</a>.</p>
 <h2 id="delivery-pipeline">Delivery pipeline</h2>
 <p>Exchange GitHub Actions builds the container, runs the Python tests inside it, starts the server and checks the health and authentication responses. The workflow supports Docker Hub publication and an EKS rollout by digest when the registry and EKS settings are configured. The configured release publishes to private ECR, and CodeBuild runs inside the VPC. On November 20 the <a href="https://github.com/pato-nego/Exchange/actions/runs/44851111950">GitHub release</a> and CodeBuild both succeeded. The running pod image matched the ECR digest <code>sha256:1a9d314ec0e5ad83e187893f4e877feb8cbe8cd9e9223d8d739c090ac8c89878</code>. Docker Hub publication requires separate registry credentials. <a href="https://github.com/pato-nego/Exchange/actions">Exchange workflow</a></p></div>
             </div>

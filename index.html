@@ -109,7 +109,8 @@
 <h1 id="pato-nego">Pato Nego</h1>
 <p>A buyer registers through Gateway, signs in, and orders products priced in US dollars. The order belongs to that buyer. When the buyer asks for a total in Brazilian reais, Order calls Exchange for the Banco Central do Brasil PTAX sell rate. The stored price stays in dollars.</p>
 <h2 id="demonstrated-purchase">Demonstrated purchase</h2>
-<p>On November 20, 2026, the public EC2 gateway accepted an order for two units at USD 4.25. The order list and detail both showed USD 8.50. At the quoted rate of 5.8889, Order returned BRL 50.06. A second signed-in account received 404 for the same order and had an empty order list. The test accounts and product were removed after the check.</p>
+<p>On November 20, 2026, the public EC2 and EKS gateways each accepted an order for two units at USD 4.25. The order list and detail both showed USD 8.50. At the quoted rate of 5.8889, Order returned BRL 50.06. A second signed-in account received 404 for the same order and had an empty order list. The test accounts and product were removed after the check.</p>
+<p><a href="evidence/eks-purchase.webm">Watch all six APIs running in EKS and the purchase through the public gateway</a>. The <a href="performance/">load-test recording</a> shows Gateway autoscaling under load.</p>
 <h2 id="services-and-source">Services and source</h2>
 <table>
 <thead>
@@ -149,7 +150,7 @@
 </tr>
 </tbody>
 </table>
-<p>Matheus Luciano owns Exchange. The Product and Order owners maintain their repositories and deployments. The group presentation should show the authenticated purchase, then the order in USD and BRL. The Kubernetes demonstration also needs all five listed services healthy in one cluster and the load test alongside the HPA. <a href="https://insper.github.io/platform/2026.2/exercises/project/presentation/">Course delivery instructions</a></p>
+<p>Matheus Luciano owns Exchange. The Product and Order owners maintain their source repositories. The parent repository configures the shared EKS deployment. <a href="https://insper.github.io/platform/2026.2/exercises/project/presentation/">Course delivery instructions</a></p>
 <h2 id="ai-assistance">AI assistance</h2>
 <p>AI assisted with Python Exchange, Gateway integration, Kubernetes manifests, infrastructure configuration, CI configuration, end-to-end verification and this documentation. The test figures come from recorded runs. Individual members should credit their own contributions in their personal submissions.</p></div>
             </div>
@@ -233,5 +234,5 @@
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2026-11-21 01:41:32.038153+00:00
+Build Date UTC : 2026-11-21 02:21:53.869355+00:00
 -->
