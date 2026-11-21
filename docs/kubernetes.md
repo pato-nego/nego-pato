@@ -8,8 +8,11 @@ The Pato Nego EKS cluster uses sa-east-1. The CloudFormation stack creates a man
 | Auth | auth, HTTP 8080 | JWT signing Secret and token lifetime |
 | Account | account, HTTP 8080 | Dedicated database credentials and regional RDS CA |
 | Exchange | exchange, HTTP 8000 | PTAX timeout and cache durations |
+| Product | product, HTTP 8080 | Product database credentials, RDS CA and Redis address |
+| Order | order, HTTP 8080 | Order database credentials, RDS CA and Product/Exchange addresses |
+| Redis | product-redis, TCP 6379 | In-memory Product detail cache |
 
-Each service has its own setup file at `api/<repo>/k8s/k8s.yaml`. Account, Auth and Gateway consume Secrets whose values are provisioned directly in the namespace. Exchange consumes public Bacen data and uses the authenticated account ID forwarded by Gateway. Internal calls resolve services by their Kubernetes DNS names. Exchange runs on the node labeled `workload=exchange`.
+Each service keeps its Kubernetes resources in its own repository’s `k8s/` directory. Order splits its Deployment, Service and autoscaler into three files. Account, Auth and Gateway consume Secrets whose values are provisioned directly in the namespace. Exchange consumes public Bacen data and uses the authenticated account ID forwarded by Gateway. Internal calls resolve services by their Kubernetes DNS names. Exchange runs on the node labeled `workload=exchange`.
 
 ## Verify the cluster
 
@@ -36,9 +39,30 @@ curl --cacert gateway.pem https://a696ab569ad9e4c62ae41bd9b2743a49-970d086819287
 
 The EKS namespace has an independent JWT key and an isolated database on the existing RDS instance. The public load-balancer smoke test passed with certificate verification, and the original EC2 gateway also returned 200 after the EKS release. Account verifies the RDS hostname and regional CA. Connectivity tests covered registration, login, account lookup, a live USD/BRL quote, the quote cache, logout and anonymous access control.
 
-## Product and Order handoff
+## Product and Order on the shared worker
 
-The Product and Order owners control their releases. The exercise calls for each owner to add their own manifest, then deploy into the same namespace. Gateway expects `product:8080` and `order:8080`. Order should call `exchange:8000` and `product:8080`. Each owner needs an authorized AWS identity and a network path to the private or IP-restricted API. Each workload should have a ready endpoint before recording the five-service demo. The owners manage any additional dedicated workers.
+Gateway routes to `product:8080` and `order:8080`. Order fetches product prices from Product and the USD/BRL quote from `exchange:8000`. Product caches repeated catalog detail reads in `product-redis:6379`. Only Gateway has a public load balancer.
+
+The parent repository pins both service revisions and their ECR image digests. Its Kustomize overlay reads the pinned manifests directly from the two submodules. It assigns Product, Order and Redis to the existing shared worker. Exchange stays on its dedicated worker. Reapply from the parent checkout with its submodules initialized:
+
+```sh
+kubectl kustomize --load-restrictor LoadRestrictionsNone infra/k8s/store |
+  kubectl apply --server-side --field-manager=pato-store -f -
+kubectl -n pato-nego rollout status deployment/product-redis
+kubectl -n pato-nego rollout status deployment/product
+kubectl -n pato-nego rollout status deployment/order
+```
+
+The render command reads files outside the overlay directory from the pinned local submodules. On a fresh namespace, provision the `rds-ca` ConfigMap with key `bundle.pem` and populate the following Secrets before deploying. Each application's login owns its own EKS database on the existing PostgreSQL instance. The overlay maps the CA bundle to the filename required by each service.
+
+| Secret | Required keys | Database |
+| --- | --- | --- |
+| `product-credentials` | `DATABASE_HOST`, `DATABASE_NAME`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` | `pato_eks_product` |
+| `order-secrets` | `DATABASE_HOST`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` | `pato_eks_order`, selected in `order-config` |
+
+A rollout initially exhausted PostgreSQL connections when overlapping replicas opened their default pools. Each EKS Product and Order replica now keeps one idle connection and can use up to three. Both apps request 125m CPU. Their autoscalers target 100% of that request, preserving the original 125m CPU threshold. A supervised scale check brought Product and Order to two Ready replicas each at the same time on the shared worker. The autoscalers were then restored to their normal range of one to three. Simultaneous scale-out across several services is limited by the capacity of the shared worker.
+
+[Watch the cluster and purchase demonstration](evidence/eks-purchase.webm).
 
 ## Delivery pipeline
 

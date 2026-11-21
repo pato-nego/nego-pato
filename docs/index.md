@@ -4,7 +4,9 @@ A buyer registers through Gateway, signs in, and orders products priced in US do
 
 ## Demonstrated purchase
 
-On November 20, 2026, the public EC2 gateway accepted an order for two units at USD 4.25. The order list and detail both showed USD 8.50. At the quoted rate of 5.8889, Order returned BRL 50.06. A second signed-in account received 404 for the same order and had an empty order list. The test accounts and product were removed after the check.
+On November 20, 2026, the public EC2 and EKS gateways each accepted an order for two units at USD 4.25. The order list and detail both showed USD 8.50. At the quoted rate of 5.8889, Order returned BRL 50.06. A second signed-in account received 404 for the same order and had an empty order list. The test accounts and product were removed after the check.
+
+[Watch all six APIs running in EKS and the purchase through the public gateway](evidence/eks-purchase.webm). The [load-test recording](performance.md) shows Gateway autoscaling under load.
 
 ## Services and source
 
@@ -18,7 +20,7 @@ On November 20, 2026, the public EC2 gateway accepted an order for two units at 
 | Store and cache catalog products | [Product](https://github.com/pato-nego/Product) |
 | Save orders, enforce ownership and convert totals | [Order-service](https://github.com/pato-nego/Order-service) and [Order contract](https://github.com/pato-nego/Order) |
 
-Matheus Luciano owns Exchange. The Product and Order owners maintain their repositories and deployments. The group presentation should show the authenticated purchase, then the order in USD and BRL. The Kubernetes demonstration also needs all five listed services healthy in one cluster and the load test alongside the HPA. [Course delivery instructions](https://insper.github.io/platform/2026.2/exercises/project/presentation/)
+Matheus Luciano owns Exchange. The Product and Order owners maintain their source repositories. The parent repository configures the shared EKS deployment. [Course delivery instructions](https://insper.github.io/platform/2026.2/exercises/project/presentation/)
 
 ## AI assistance
 
