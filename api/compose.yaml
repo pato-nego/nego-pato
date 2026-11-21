@@ -12,9 +12,7 @@ services:
       - order
 
   exchange:
-    build:
-      context: .
-      dockerfile: exchange/Dockerfile
+    build: ./exchange
 
   auth:
     build: ./auth-service

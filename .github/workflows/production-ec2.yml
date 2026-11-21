@@ -5,7 +5,6 @@ on:
     branches: [main]
     paths:
       - api/exchange
-      - api/exchange-service
       - api/gateway-service
       - .github/deploy-ec2.sh
       - .github/workflows/production-ec2.yml
@@ -45,11 +44,10 @@ jobs:
         run: |
           mvn -B -ntp -f api/gateway-service/pom.xml package
           cp api/gateway-service/target/gateway-service-*.jar "$RUNNER_TEMP/gateway.jar"
-          test "$(cat api/exchange/exchange-service.rev)" = "$(git -C api/exchange-service rev-parse HEAD)"
-          docker build -f api/exchange/Dockerfile -t exchange:ci api
+          docker build -t exchange:ci api/exchange
           docker run --rm \
-            --mount "type=bind,source=$PWD/api/exchange-service/test_rates.py,target=/tmp/test_rates.py,readonly" \
-            exchange:ci .venv/bin/python -m unittest discover -s /tmp -p test_rates.py
+            --mount "type=bind,source=$PWD/api/exchange/test_rates.py,target=/app/exchange/test_rates.py,readonly" \
+            exchange:ci .venv/bin/python -m unittest test_rates
           docker save exchange:ci | gzip > "$RUNNER_TEMP/exchange-image.tar.gz"
           for release in gateway exchange; do
             install -m 755 .github/deploy-ec2.sh "$RUNNER_TEMP/deploy-ec2.sh"
