@@ -158,7 +158,7 @@
 </tr>
 </tbody>
 </table>
-<p>Each service keeps its Kubernetes resources in its own repository’s <code>k8s/</code> directory. Order splits its Deployment, Service and autoscaler into three files. Account, Auth and Gateway consume Secrets whose values are provisioned directly in the namespace. Exchange consumes public Bacen data and uses the authenticated account ID forwarded by Gateway. Internal calls resolve services by their Kubernetes DNS names. Exchange runs on the node labeled <code>workload=exchange</code>.</p>
+<p>Each service keeps its Kubernetes resources in its own repository’s <code>k8s/</code> directory. Order defines its Deployment, Service and autoscaler together in <code>api/order-service/k8s/k8s.yaml</code>. Account, Auth and Gateway consume Secrets whose values are provisioned directly in the namespace. Exchange consumes public Bacen data and uses the authenticated account ID forwarded by Gateway. Internal calls resolve services by their Kubernetes DNS names. Exchange runs on the node labeled <code>workload=exchange</code>.</p>
 <h2 id="verify-the-cluster">Verify the cluster</h2>
 <p>With an authorized AWS identity and network path to the API, use the following commands.</p>
 <pre><code class="language-sh">aws eks update-kubeconfig --region sa-east-1 --name pato-nego
