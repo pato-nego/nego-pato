@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="None">
+        
+        <link rel="canonical" href="https://pato-nego.github.io/nego-pato/">
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>Pato Nego · Microservices</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/fontawesome.min.css" rel="stylesheet">
+        <link href="css/brands.min.css" rel="stylesheet">
+        <link href="css/solid.min.css" rel="stylesheet">
+        <link href="css/v4-font-face.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body class="homepage">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href=".">Pato Nego · Microservices</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href="." class="nav-link active" aria-current="page">Project and demo</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="kubernetes/" class="nav-link">Kubernetes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="performance/" class="nav-link">Bottlenecks and load tests</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="costs/" class="nav-link">Costs and service objectives</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" class="nav-link disabled">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="kubernetes/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/pato-nego/nego-pato/edit/master/docs/index.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#pato-nego" class="nav-link">Pato Nego</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#demonstrated-purchase" class="nav-link">Demonstrated purchase</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#services-and-source" class="nav-link">Services and source</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#ai-assistance" class="nav-link">AI assistance</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="pato-nego">Pato Nego</h1>
+<p>A buyer registers through Gateway, signs in, and orders products priced in US dollars. The order belongs to that buyer. When the buyer asks for a total in Brazilian reais, Order calls Exchange for the Banco Central do Brasil PTAX sell rate. The stored price stays in dollars.</p>
+<h2 id="demonstrated-purchase">Demonstrated purchase</h2>
+<p>On November 20, 2026, the public EC2 gateway accepted an order for two units at USD 4.25. The order list and detail both showed USD 8.50. At the quoted rate of 5.8889, Order returned BRL 50.06. A second signed-in account received 404 for the same order and had an empty order list. The test accounts and product were removed after the check.</p>
+<h2 id="services-and-source">Services and source</h2>
+<table>
+<thead>
+<tr>
+<th>Responsibility</th>
+<th>Repository</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Project integration and Compose</td>
+<td><a href="https://github.com/pato-nego/nego-pato">nego-pato</a></td>
+</tr>
+<tr>
+<td>Authenticate and route traffic</td>
+<td><a href="https://github.com/pato-nego/Gateway-service">Gateway-service</a></td>
+</tr>
+<tr>
+<td>Register users, issue and validate login cookies</td>
+<td><a href="https://github.com/pato-nego/Auth-service">Auth-service</a> and <a href="https://github.com/pato-nego/Auth">Auth contract</a></td>
+</tr>
+<tr>
+<td>Store accounts and password hashes in PostgreSQL</td>
+<td><a href="https://github.com/pato-nego/Account-service">Account-service</a> and <a href="https://github.com/pato-nego/Account">Account contract</a></td>
+</tr>
+<tr>
+<td>Fetch and cache PTAX quotes</td>
+<td><a href="https://github.com/pato-nego/Exchange">Exchange</a></td>
+</tr>
+<tr>
+<td>Store and cache catalog products</td>
+<td><a href="https://github.com/pato-nego/Product">Product</a></td>
+</tr>
+<tr>
+<td>Save orders, enforce ownership and convert totals</td>
+<td><a href="https://github.com/pato-nego/Order-service">Order-service</a> and <a href="https://github.com/pato-nego/Order">Order contract</a></td>
+</tr>
+</tbody>
+</table>
+<p>Matheus Luciano owns Exchange. The Product and Order owners maintain their repositories and deployments. The group presentation should show the authenticated purchase, then the order in USD and BRL. The Kubernetes demonstration also needs all five listed services healthy in one cluster and the load test alongside the HPA. <a href="https://insper.github.io/platform/2026.2/exercises/project/presentation/">Course delivery instructions</a></p>
+<h2 id="ai-assistance">AI assistance</h2>
+<p>AI assisted with Python Exchange, Gateway integration, Kubernetes manifests, infrastructure configuration, CI configuration, end-to-end verification and this documentation. The test figures come from recorded runs. Individual members should credit their own contributions in their personal submissions.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = ".",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="js/base.js"></script>
+        <script src="search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2026-11-21 01:41:32.038153+00:00
+-->

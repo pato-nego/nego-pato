@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        <link rel="canonical" href="https://pato-nego.github.io/nego-pato/costs/">
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Costs and service objectives - Pato Nego · Microservices</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">Pato Nego · Microservices</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Project and demo</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../kubernetes/" class="nav-link">Kubernetes</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../performance/" class="nav-link">Bottlenecks and load tests</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="./" class="nav-link active" aria-current="page">Costs and service objectives</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../performance/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" class="nav-link disabled">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="https://github.com/pato-nego/nego-pato/edit/master/docs/costs.md" class="nav-link"><i class="fa-brands fa-github"></i> Edit on GitHub</a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#sao-paulo-operating-costs" class="nav-link">São Paulo operating costs</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#managed-services-and-availability" class="nav-link">Managed services and availability</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="sao-paulo-operating-costs">São Paulo operating costs</h1>
+<p>The estimate uses 730 hours per month, USD on-demand rates and the November 20, 2026 inventory in sa-east-1. The four public IPv4 addresses cover the existing gateway, the two teammates’ public hosts and the NAT gateway. The RDS instance has seven-day backup retention. These are list-price projections before credits, taxes, usage-based charges and discounts.</p>
+<table>
+<thead>
+<tr>
+<th>EC2 deployment</th>
+<th>Quantity and rate</th>
+<th style="text-align: right;">USD/month</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Product, Order and Exchange compute</td>
+<td>3 × t3.micro at 0.0168/hour</td>
+<td style="text-align: right;">36.79</td>
+</tr>
+<tr>
+<td>Identity compute</td>
+<td>1 × t3.small at 0.0336/hour</td>
+<td style="text-align: right;">24.53</td>
+</tr>
+<tr>
+<td>Gateway compute</td>
+<td>1 × t3.medium at 0.0672/hour</td>
+<td style="text-align: right;">49.06</td>
+</tr>
+<tr>
+<td>EC2 disks</td>
+<td>86 GB gp3 at 0.152/GB-month</td>
+<td style="text-align: right;">13.07</td>
+</tr>
+<tr>
+<td>PostgreSQL compute</td>
+<td>Single-AZ db.t4g.micro at 0.034/hour</td>
+<td style="text-align: right;">24.82</td>
+</tr>
+<tr>
+<td>PostgreSQL disk</td>
+<td>20 GB gp3 at 0.219/GB-month</td>
+<td style="text-align: right;">4.38</td>
+</tr>
+<tr>
+<td>Outbound network</td>
+<td>1 NAT at 0.093/hour</td>
+<td style="text-align: right;">67.89</td>
+</tr>
+<tr>
+<td>Public IPv4</td>
+<td>4 at 0.005/hour</td>
+<td style="text-align: right;">14.60</td>
+</tr>
+<tr>
+<td><strong>Existing fixed-cost estimate</strong></td>
+<td></td>
+<td style="text-align: right;"><strong>235.14</strong></td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Additional EKS deployment</th>
+<th style="text-align: right;">USD/month</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Standard-support control plane at 0.10/hour</td>
+<td style="text-align: right;">73.00</td>
+</tr>
+<tr>
+<td>Two t3.medium workers</td>
+<td style="text-align: right;">98.11</td>
+</tr>
+<tr>
+<td>Two 20 GB worker disks at 0.152/GB-month if gp3</td>
+<td style="text-align: right;">6.08</td>
+</tr>
+<tr>
+<td>One load balancer at 0.034/hour</td>
+<td style="text-align: right;">24.82</td>
+</tr>
+<tr>
+<td><strong>Incremental estimate before usage</strong></td>
+<td style="text-align: right;"><strong>202.01</strong></td>
+</tr>
+</tbody>
+</table>
+<p>An internet-facing load balancer with two public IPv4 addresses adds about USD 7.30/month. An internal load balancer uses private addresses. NAT adds USD 0.093 per GB processed. Load-balancer capacity or processed bytes, registry storage, cross-AZ traffic, internet egress, burst credits and excess backup storage depend on usage. The existing VPC, NAT and RDS are shared across the two environments. Reproduce the estimate with the São Paulo region and the quantities above. <a href="https://calculator.aws/">AWS Pricing Calculator</a> · <a href="https://aws.amazon.com/aws-cost-management/aws-price-list-api/">AWS Price List</a> · <a href="https://aws.amazon.com/eks/pricing/">EKS pricing</a></p>
+<p>The account’s AWS Pricing Calculator workload estimate <code>Pato-Nego-Sao-Paulo-EC2-and-EKS</code> returned <strong>USD 444.45/month</strong> for 13 line items. This includes the two public load-balancer addresses. Find the saved workload estimate in Billing and Cost Management → Pricing Calculator. Cost Explorer reported preliminary São Paulo regional unblended costs of USD 0.90 on November 18 and USD 7.06 on November 19, before EKS provisioning. Those are account-wide daily observations. CodeBuild deployment minutes and ECR image storage add usage charges.</p>
+<h2 id="managed-services-and-availability">Managed services and availability</h2>
+<p>RDS manages PostgreSQL backups and patching. EKS operates the Kubernetes control plane. The group remains responsible for application rollouts, database migrations, worker capacity and recovery. The EC2 app has single service hosts and a single-AZ database. A database outage can stop purchases even when Gateway and Exchange are healthy.</p>
+<p>A proposed course-demo objective is 99% successful authenticated reads per month and p95 below 500 ms for cached catalog reads at ten concurrent users. Count unexpected 5xx responses and timeouts as failures. Exclude deliberately invalid test requests. At 99% availability a 30-day month allows 7 hours 12 minutes of downtime. The short local measurements support the latency target under that workload. A monthly availability claim needs continuous end-to-end measurements. <a href="../performance/">Load-test results</a></p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
