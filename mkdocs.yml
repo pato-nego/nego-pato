@@ -1,8 +1,0 @@
-site_name: Pato Nego · Microservices
-site_url: https://pato-nego.github.io/nego-pato/
-repo_url: https://github.com/pato-nego/nego-pato
-nav:
-  - Project and demo: index.md
-  - Kubernetes: kubernetes.md
-  - Bottlenecks and load tests: performance.md
-  - Costs and service objectives: costs.md
