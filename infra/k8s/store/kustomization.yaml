@@ -1,0 +1,50 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: pato-nego
+resources:
+  - ../../../api/product/k8s/k8s.yaml
+  - ../../../api/order-service/k8s/deployment.yaml
+  - ../../../api/order-service/k8s/service.yaml
+  - ../../../api/order-service/k8s/hpa.yaml
+  - order-config.yaml
+patches:
+  - path: order-deployment.yaml
+  - target:
+      kind: Deployment
+      name: 'product|product-redis|order'
+    patch: |-
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value:
+          eks.amazonaws.com/nodegroup: shared
+  - target:
+      kind: Deployment
+      name: 'product|order'
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/resources/requests/cpu
+        value: 125m
+  - target:
+      kind: ConfigMap
+      name: 'product-config|order-config'
+    patch: |-
+      - op: add
+        path: /data/SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+        value: "3"
+      - op: add
+        path: /data/SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE
+        value: "1"
+  - target:
+      kind: HorizontalPodAutoscaler
+      name: 'product|order'
+    patch: |-
+      - op: replace
+        path: /spec/metrics/0/resource/target/averageUtilization
+        value: 100
+images:
+  - name: pato-nego/product
+    newName: 471112964326.dkr.ecr.sa-east-1.amazonaws.com/pato-nego/product
+    digest: sha256:2f3484630d76cfb40128b4c80a64702d5daa88dd5d8e473dfd11b495537b0278
+  - name: registry.invalid/order-service
+    newName: 471112964326.dkr.ecr.sa-east-1.amazonaws.com/pato-nego/order-service
+    digest: sha256:d3e01bdfd35836563ddf1d0f87ed1011ddb56b6939377c8419835952584eac92

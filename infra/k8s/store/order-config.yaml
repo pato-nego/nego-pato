@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: order-config
+data:
+  DATABASE_DB: pato_eks_order
+  PRODUCT_URL: http://product:8080
+  EXCHANGE_URL: http://exchange:8000
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: order-secrets
+type: Opaque

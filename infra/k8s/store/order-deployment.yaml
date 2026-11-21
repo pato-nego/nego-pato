@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order
+spec:
+  template:
+    spec:
+      volumes:
+        - name: rds-ca
+          configMap:
+            name: rds-ca
+            items:
+              - key: bundle.pem
+                path: rds-ca.pem
+      containers:
+        - name: order
+          envFrom:
+            - configMapRef:
+                name: order-config
+          env:
+            - name: DATABASE_HOST
+              valueFrom:
+                $patch: replace
+                secretKeyRef:
+                  name: order-secrets
+                  key: DATABASE_HOST
