@@ -1,5 +1,7 @@
 # nego-pato
 
+The [published project documentation](https://pato-nego.github.io/nego-pato/) covers the purchase demo, Kubernetes, load tests and operating costs. The [MkDocs source](docs/index.md) builds with `mkdocs build --strict`.
+
 The gateway exposes the Bacen PTAX Exchange API at `GET /exchange/{from}/{to}`.
 The plural `/exchanges/{from}/{to}` path also works. Exchange
 runs on the private Compose network and accepts the account ID forwarded by the
